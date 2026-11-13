@@ -1,0 +1,18 @@
+# Android build outputs & caches
+.gradle/
+build/
+app/build/
+*.apk
+*.aab
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Local database
+notes_checklist.db

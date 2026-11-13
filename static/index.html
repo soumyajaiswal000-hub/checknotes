@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notes & Daily Checklist</title>
+  
+  <!-- PWA & Mobile Meta Tags -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#090d16" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom App CSS -->
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body class="h-screen w-screen overflow-hidden flex flex-col md:flex-row bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased selection:bg-blue-500 selection:text-white">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="w-full md:w-64 lg:w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col flex-shrink-0 z-20">
+    <!-- Brand Header -->
+    <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+        </div>
+        <div>
+          <h1 class="font-bold text-base tracking-tight text-slate-800 dark:text-slate-100">CheckNotes</h1>
+          <span id="sidebar-streak-badge" class="text-[11px] font-semibold text-amber-500 flex items-center gap-1">
+            🔥 1d streak
+          </span>
+        </div>
+      </div>
+
+      <!-- Theme Toggle -->
+      <button id="theme-toggle-btn" class="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Toggle theme">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+      </button>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="p-3 space-y-1">
+      <button data-tab="checklist" class="nav-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all bg-blue-500/10 text-blue-600 dark:text-blue-400 font-semibold">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+        <span>Daily Checklist</span>
+      </button>
+
+      <button data-tab="notes" class="nav-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        <span>Notes & Journal</span>
+      </button>
+
+      <button data-tab="stats" class="nav-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        <span>Streaks & Stats</span>
+      </button>
+    </nav>
+
+    <!-- Daily Log Quick Action -->
+    <div class="px-3 py-2">
+      <button onclick="app.openTodayDailyNote()" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-amber-50 hover:bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:hover:bg-amber-900/50 dark:text-amber-200 border border-amber-200/60 dark:border-amber-800/60 transition-colors shadow-sm">
+        <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        <span>Open Today's Journal</span>
+      </button>
+    </div>
+
+    <!-- Tags Filter Section -->
+    <div class="flex-1 overflow-y-auto px-4 py-3 border-t border-slate-100 dark:border-slate-800/80">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Tags</span>
+      </div>
+      <div id="tags-filter-container" class="space-y-1">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- Bottom Actions / Tools -->
+    <div class="p-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-slate-400">
+      <div class="flex items-center gap-1">
+        <button id="audio-toggle-btn" class="p-2 rounded-lg hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Toggle completion chime">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M11 5L6 9H2v6h4l5 4V5z"/></svg>
+        </button>
+
+        <button onclick="app.exportAllData()" class="p-2 rounded-lg hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Backup / Export data (JSON)">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        </button>
+
+        <label class="p-2 rounded-lg hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer" title="Restore / Import data">
+          <input type="file" id="import-file-input" accept=".json" class="hidden" />
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+        </label>
+      </div>
+
+      <button onclick="document.getElementById('shortcuts-modal').classList.remove('hidden')" class="p-2 rounded-lg hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Keyboard Shortcuts">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN CONTENT VIEWS ================= -->
+  <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 dark:bg-slate-950">
+
+    <!-- ========== TAB 1: DAILY CHECKLIST ========== -->
+    <div id="tab-checklist" class="flex-1 flex flex-col h-full overflow-y-auto">
+      
+      <!-- Sticky Date Header & Controls -->
+      <div class="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-6 py-4">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <!-- Date Navigator -->
+          <div class="flex items-center gap-3">
+            <button onclick="app.changeDate(-1)" class="p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors" title="Previous day">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+
+            <div>
+              <h2 id="current-date-title" class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Today</h2>
+            </div>
+
+            <button onclick="app.changeDate(1)" class="p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors" title="Next day">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+
+            <button onclick="app.setDate(getTodayDateStr())" class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 hover:bg-blue-100 transition-colors">
+              Today
+            </button>
+          </div>
+
+          <!-- Quick Date Strip (7 days) -->
+          <div id="date-strip-container" class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+            <!-- Rendered dynamically -->
+          </div>
+
+          <!-- Checklist Action Buttons -->
+          <div class="flex items-center gap-2">
+            <button onclick="app.rolloverYesterday()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-300 shadow-sm transition-colors" title="Bring incomplete tasks from yesterday">
+              <svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              <span>Rollover</span>
+            </button>
+
+            <button onclick="app.applyDailyRoutines()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-300 shadow-sm transition-colors" title="Apply daily habits">
+              <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              <span>Habits</span>
+            </button>
+
+            <button onclick="app.openRoutinesModal()" class="p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Manage Recurring Routines">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Checklist Main Body -->
+      <div class="max-w-4xl w-full mx-auto p-6 space-y-6">
+
+        <!-- Progress Summary Card -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div class="flex items-center justify-between mb-2.5">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Daily Completion</span>
+            <span id="checklist-progress-text" class="text-xs font-semibold text-slate-700 dark:text-slate-300">0 of 0 completed (0%)</span>
+          </div>
+          <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
+            <div id="checklist-progress-bar" class="bg-gradient-to-r from-blue-500 to-emerald-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- Task Quick Add Bar -->
+        <div class="flex items-center gap-2 p-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div class="pl-2 text-slate-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          </div>
+          <input
+            type="text"
+            id="new-task-input"
+            placeholder="Add a new checklist task for today... (Press Enter)"
+            class="flex-1 bg-transparent border-0 px-2 py-1.5 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none"
+          />
+
+          <!-- Category Input -->
+          <input
+            type="text"
+            id="new-task-category"
+            placeholder="category (e.g. work)"
+            class="w-28 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-slate-700 dark:text-slate-300 focus:outline-none"
+          />
+
+          <!-- Priority Select -->
+          <select id="new-task-priority" class="text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-slate-700 dark:text-slate-300 focus:outline-none font-medium">
+            <option value="medium">🟡 Medium</option>
+            <option value="high">🔴 High</option>
+            <option value="low">🟢 Low</option>
+          </select>
+
+          <button id="add-task-btn" class="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-colors">
+            Add
+          </button>
+        </div>
+
+        <!-- Filter Tabs & Task List -->
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center bg-slate-200/60 dark:bg-slate-800/60 p-1 rounded-xl text-xs">
+              <button data-filter="all" class="checklist-filter-tab px-3 py-1 rounded-lg bg-white dark:bg-slate-800 shadow-sm text-slate-900 dark:text-white font-semibold transition-all">All</button>
+              <button data-filter="pending" class="checklist-filter-tab px-3 py-1 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-all">Pending</button>
+              <button data-filter="completed" class="checklist-filter-tab px-3 py-1 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-all">Completed</button>
+            </div>
+          </div>
+
+          <!-- List Container -->
+          <div id="checklist-items-container" class="space-y-2">
+            <!-- Dynamic items rendered here -->
+          </div>
+
+          <!-- Empty State -->
+          <div id="checklist-empty-state" class="hidden text-center py-16 px-4">
+            <div class="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-500 flex items-center justify-center mx-auto mb-3">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <h3 class="text-base font-semibold text-slate-800 dark:text-slate-200">All clear for this day!</h3>
+            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Add tasks using the input above, or click "Habits" to apply your pre-set daily routines.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========== TAB 2: NOTES & JOURNAL ========== -->
+    <div id="tab-notes" class="hidden flex-1 flex h-full overflow-hidden">
+      
+      <!-- Notes Master List Pane -->
+      <div class="w-80 md:w-88 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col h-full flex-shrink-0">
+        <!-- Search & New Note Header -->
+        <div class="p-3 border-b border-slate-100 dark:border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold text-sm text-slate-800 dark:text-slate-100">All Notes</h3>
+              <span id="notes-count-badge" class="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-semibold">0</span>
+            </div>
+            <button id="new-note-btn" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-colors">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              <span>New Note</span>
+            </button>
+          </div>
+
+          <!-- Search Bar -->
+          <div class="relative">
+            <svg class="w-4 h-4 absolute left-3 top-2.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input
+              type="text"
+              id="notes-search-input"
+              placeholder="Search notes or #tags..."
+              class="w-full bg-slate-100 dark:bg-slate-800 border-0 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+
+        <!-- Notes List Scrollable -->
+        <div id="notes-list-container" class="flex-1 overflow-y-auto p-3 space-y-2">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Notes Editor & Preview Pane -->
+      <div class="flex-1 flex flex-col h-full bg-slate-50 dark:bg-slate-950 overflow-hidden">
+        
+        <!-- Empty State (No Note Selected) -->
+        <div id="editor-empty-state" class="hidden flex-1 flex flex-col items-center justify-center p-6 text-center text-slate-400">
+          <div class="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3">
+            <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+          </div>
+          <h4 class="font-semibold text-base text-slate-700 dark:text-slate-300">No Note Selected</h4>
+          <p class="text-xs text-slate-400 mt-1">Select a note from the left, or create a new one to begin typing.</p>
+        </div>
+
+        <!-- Active Note Editor -->
+        <div id="editor-active-state" class="flex-1 flex flex-col h-full overflow-hidden">
+          
+          <!-- Top Editor Action Bar -->
+          <div class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-3 flex items-center justify-between flex-shrink-0">
+            <!-- Mode Switcher (Edit, Preview, Split) -->
+            <div class="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs">
+              <button id="mode-btn-edit" onclick="app.setEditorMode('edit')" class="px-3 py-1 rounded-lg bg-blue-600 text-white font-medium transition-colors">Edit</button>
+              <button id="mode-btn-split" onclick="app.setEditorMode('split')" class="px-3 py-1 rounded-lg hover:text-slate-900 dark:hover:text-white transition-colors">Split</button>
+              <button id="mode-btn-preview" onclick="app.setEditorMode('preview')" class="px-3 py-1 rounded-lg hover:text-slate-900 dark:hover:text-white transition-colors">Preview</button>
+            </div>
+
+            <!-- Note Tools: Color, Pin, Export, Delete -->
+            <div class="flex items-center gap-2">
+              <!-- Color Palette Picker -->
+              <div class="flex items-center gap-1.5 mr-2">
+                <button onclick="app.setNoteColor('#ffffff')" class="w-4 h-4 rounded-full border border-slate-300 bg-white" title="White"></button>
+                <button onclick="app.setNoteColor('#fef3c7')" class="w-4 h-4 rounded-full bg-amber-200" title="Warm Amber"></button>
+                <button onclick="app.setNoteColor('#d1fae5')" class="w-4 h-4 rounded-full bg-emerald-200" title="Mint Green"></button>
+                <button onclick="app.setNoteColor('#e0f2fe')" class="w-4 h-4 rounded-full bg-sky-200" title="Sky Blue"></button>
+                <button onclick="app.setNoteColor('#ffe4e6')" class="w-4 h-4 rounded-full bg-rose-200" title="Rose"></button>
+                <button onclick="app.setNoteColor('#f3e8ff')" class="w-4 h-4 rounded-full bg-purple-200" title="Lavender"></button>
+              </div>
+
+              <button id="note-pin-btn" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors" title="Pin note">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+              </button>
+
+              <button id="export-note-md-btn" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors" title="Export as .md">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              </button>
+
+              <button id="delete-note-btn" class="p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-400 hover:text-rose-600 transition-colors" title="Delete note">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Markdown Formatting Toolbar -->
+          <div class="px-6 py-2 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 flex items-center gap-1 overflow-x-auto text-slate-500 text-xs">
+            <button onclick="app.insertEditorSnippet('**', '**')" class="px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 font-bold" title="Bold">B</button>
+            <button onclick="app.insertEditorSnippet('*', '*')" class="px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 italic" title="Italic">I</button>
+            <button onclick="app.insertEditorSnippet('~~', '~~')" class="px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 line-through" title="Strikethrough">S</button>
+            <div class="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+            <button onclick="app.insertEditorSnippet('# ')" class="px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 font-bold" title="Heading 1">H1</button>
+            <button onclick="app.insertEditorSnippet('## ')" class="px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 font-bold" title="Heading 2">H2</button>
+            <div class="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+            <button onclick="app.insertEditorSnippet('- ')" class="px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800" title="Bullet List">• List</button>
+            <button onclick="app.insertEditorSnippet('- [ ] ')" class="px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800" title="Task List">☑ Checklist</button>
+            <button onclick="app.insertEditorSnippet('> ')" class="px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800" title="Blockquote">“ Quote</button>
+            <button onclick="app.insertEditorSnippet('```\n', '\n```')" class="px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 font-mono" title="Code Block">&lt;/&gt;</button>
+            <button onclick="app.insertEditorSnippet('\n---\n')" class="px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800" title="Divider">— Line</button>
+          </div>
+
+          <!-- Title & Tags Bar -->
+          <div class="px-8 pt-6 pb-2 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800/60">
+            <input
+              type="text"
+              id="note-title-input"
+              placeholder="Note Title..."
+              class="w-full text-2xl font-bold bg-transparent border-0 p-0 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none"
+            />
+
+            <!-- Tags List & Adder -->
+            <div class="flex items-center gap-2 mt-3 flex-wrap">
+              <div id="note-editor-tags" class="flex items-center gap-1.5 flex-wrap">
+                <!-- Rendered dynamically -->
+              </div>
+              <input
+                type="text"
+                id="add-tag-input"
+                placeholder="+ Add tag (Enter)"
+                class="text-xs bg-transparent border-0 p-0 text-slate-400 placeholder-slate-400 focus:outline-none focus:text-slate-800 dark:focus:text-slate-200 w-28"
+              />
+            </div>
+          </div>
+
+          <!-- Split / Single Content Area -->
+          <div class="flex-1 flex overflow-hidden bg-white dark:bg-slate-900">
+            
+            <!-- Editor Textarea Pane -->
+            <div id="editor-edit-pane" class="w-full h-full p-8 overflow-y-auto">
+              <textarea
+                id="note-content-input"
+                placeholder="Write your note in Markdown... You can add daily checklists with '- [ ] task', headers, code blocks, and thoughts."
+                class="w-full h-full bg-transparent border-0 resize-none font-sans text-sm leading-relaxed text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none"
+              ></textarea>
+            </div>
+
+            <!-- Live Markdown Preview Pane -->
+            <div id="editor-preview-pane" class="hidden w-1/2 h-full p-8 border-l border-slate-200 dark:border-slate-800 overflow-y-auto bg-slate-50/50 dark:bg-slate-950/50">
+              <div id="markdown-preview-content" class="markdown-preview text-slate-800 dark:text-slate-200 text-sm">
+                <!-- Live markdown output -->
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ========== TAB 3: STREAKS & STATS ========== -->
+    <div id="tab-stats" class="hidden flex-1 flex flex-col h-full overflow-y-auto p-6 md:p-8">
+      <div class="max-w-4xl w-full mx-auto space-y-6">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Productivity & Streaks</h2>
+          <p class="text-xs text-slate-500 mt-1">Consistency and progress metrics across your notes and daily checklists.</p>
+        </div>
+
+        <!-- 3 KPI Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-500 flex items-center justify-center text-2xl">
+              🔥
+            </div>
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Current Streak</span>
+              <h3 id="stats-streak-count" class="text-xl font-bold text-slate-900 dark:text-white mt-0.5">0 Days</h3>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-500 flex items-center justify-center">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Notes</span>
+              <h3 id="stats-notes-count" class="text-xl font-bold text-slate-900 dark:text-white mt-0.5">0</h3>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-500 flex items-center justify-center">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Tasks Completed</span>
+              <h3 id="stats-tasks-count" class="text-xl font-bold text-slate-900 dark:text-white mt-0.5">0 / 0</h3>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7-Day Completion Bar Chart -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200 mb-6">Last 7 Days Completion Rate</h4>
+          <div id="stats-chart-bars" class="flex items-end justify-between gap-4 h-48">
+            <!-- Dynamic Chart Bars -->
+          </div>
+        </div>
+
+        <!-- Productivity Tips -->
+        <div class="p-5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/20 border border-blue-200/60 dark:border-blue-900/40 text-xs text-blue-900 dark:text-blue-200 space-y-2">
+          <h5 class="font-bold flex items-center gap-1.5">
+            <span>💡 Pro Tip: Maintain your daily streak</span>
+          </h5>
+          <p class="leading-relaxed">Complete at least one priority task each day to keep your streak alive. Use the <strong>"Rollover Incomplete"</strong> button each morning so nothing falls through the cracks!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Bottom Tab Bar (Visible on Nothing Phone / Mobile) -->
+    <div class="md:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-slate-200 dark:border-slate-800 px-4 py-2 flex items-center justify-around flex-shrink-0 z-30">
+      <button data-tab="checklist" class="nav-link flex flex-col items-center gap-1 text-blue-600 dark:text-blue-400 font-semibold text-[11px]">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+        <span>Checklist</span>
+      </button>
+      <button data-tab="notes" class="nav-link flex flex-col items-center gap-1 text-slate-500 hover:text-slate-900 dark:hover:text-white text-[11px]">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        <span>Notes</span>
+      </button>
+      <button data-tab="stats" class="nav-link flex flex-col items-center gap-1 text-slate-500 hover:text-slate-900 dark:hover:text-white text-[11px]">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        <span>Stats</span>
+      </button>
+      <button onclick="document.getElementById('phone-install-modal').classList.remove('hidden')" class="flex flex-col items-center gap-1 text-rose-500 font-semibold text-[11px]">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+        <span>Install App</span>
+      </button>
+    </div>
+
+  </main>
+
+  <!-- ================= MODALS & OVERLAYS ================= -->
+
+  <!-- Recurring Routines Modal -->
+  <div id="routines-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 max-w-lg w-full p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="font-bold text-base text-slate-900 dark:text-white">Daily Habits & Routines</h3>
+          <p class="text-xs text-slate-400">Tasks that you can apply to any day with 1-click.</p>
+        </div>
+        <button onclick="app.closeRoutinesModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg font-bold">&times;</button>
+      </div>
+
+      <!-- Add Routine Input -->
+      <div class="flex items-center gap-2">
+        <input
+          type="text"
+          id="modal-routine-title"
+          placeholder="e.g. Read 15 mins..."
+          class="flex-1 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-100 focus:outline-none"
+        />
+        <select id="modal-routine-category" class="text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2 py-2 text-slate-700 dark:text-slate-300">
+          <option value="routine">Routine</option>
+          <option value="morning">Morning</option>
+          <option value="health">Health</option>
+          <option value="work">Work</option>
+          <option value="evening">Evening</option>
+        </select>
+        <button
+          onclick="app.addRoutineItem(document.getElementById('modal-routine-title').value, document.getElementById('modal-routine-category').value); document.getElementById('modal-routine-title').value = '';"
+          class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold"
+        >
+          Add
+        </button>
+      </div>
+
+      <!-- Routines List -->
+      <div id="routines-list-container" class="max-h-60 overflow-y-auto space-y-2">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button onclick="app.closeRoutinesModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Keyboard Shortcuts Modal -->
+  <div id="shortcuts-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 max-w-md w-full p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-base text-slate-900 dark:text-white">Keyboard Shortcuts</h3>
+        <button onclick="document.getElementById('shortcuts-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg font-bold">&times;</button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div class="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+          <span class="text-slate-600 dark:text-slate-300">New Note</span>
+          <kbd class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-mono text-[11px] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">Cmd / Ctrl + N</kbd>
+        </div>
+        <div class="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+          <span class="text-slate-600 dark:text-slate-300">New Checklist Task</span>
+          <kbd class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-mono text-[11px] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">Cmd / Ctrl + T</kbd>
+        </div>
+        <div class="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+          <span class="text-slate-600 dark:text-slate-300">Toggle Dark Mode</span>
+          <kbd class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-mono text-[11px] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">Cmd / Ctrl + Shift + D</kbd>
+        </div>
+        <div class="flex items-center justify-between py-1">
+          <span class="text-slate-600 dark:text-slate-300">Close Modal</span>
+          <kbd class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-mono text-[11px] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">Esc</kbd>
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button onclick="document.getElementById('shortcuts-modal').classList.add('hidden')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold">
+          Got it
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phone Install Modal (Nothing Phone 3) -->
+  <div id="phone-install-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 max-w-lg w-full p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center font-bold">
+            📱
+          </div>
+          <div>
+            <h3 class="font-bold text-base text-slate-900 dark:text-white">Use on Nothing Phone 3</h3>
+            <p class="text-xs text-slate-400">Install as native PWA or build APK</p>
+          </div>
+        </div>
+        <button onclick="document.getElementById('phone-install-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg font-bold">&times;</button>
+      </div>
+
+      <!-- Quick 1-Click Install Method -->
+      <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Method 1: Direct Install (Instant)</span>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-semibold">Recommended</span>
+        </div>
+        <ol class="text-xs text-slate-600 dark:text-slate-300 space-y-2 list-decimal list-inside leading-relaxed">
+          <li>Ensure your Nothing Phone 3 is connected to the same Wi-Fi.</li>
+          <li>Open Chrome on your phone and browse to:<br>
+            <code class="inline-block mt-1 px-2.5 py-1 rounded-lg bg-slate-200 dark:bg-slate-700 font-mono text-slate-900 dark:text-slate-100 font-bold select-all">http://192.168.1.8:8080</code>
+          </li>
+          <li>Tap the <strong>three dots (⋮)</strong> in Chrome and tap <strong>"Install app"</strong> (or "Add to Home screen").</li>
+          <li>CheckNotes installs directly to your app drawer/home screen with full offline support and zero browser bars!</li>
+        </ol>
+      </div>
+
+      <!-- Method 2: Android Studio / APK Build -->
+      <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-2">
+        <span class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Method 2: Standalone .APK Package</span>
+        <p class="text-xs text-slate-500 leading-relaxed">
+          A complete, pre-configured Android Studio project is prepared in the <code class="text-rose-500 font-mono">android/</code> directory. You can compile it into a release APK using Android Studio, or via the included GitHub Actions workflow!
+        </p>
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button onclick="document.getElementById('phone-install-modal').classList.add('hidden')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold">
+          Got it
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Application Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
